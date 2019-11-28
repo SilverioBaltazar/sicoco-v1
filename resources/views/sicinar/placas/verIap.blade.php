@@ -1,0 +1,134 @@
+@extends('sicinar.principal')
+
+@section('title','Ver IAPS')
+
+@section('links')
+    <link rel="stylesheet" href="{{ asset('bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css') }}">
+@endsection
+
+@section('nombre')
+    {{$nombre}}
+@endsection
+
+@section('usuario')
+    {{$usuario}}
+@endsection
+
+@section('estructura')
+    {{$estructura}}
+@endsection
+
+@section('content')
+    <div class="content-wrapper">
+        <section class="content-header">
+            <h1>Instituciones de Asistencia Privada (IAPS)
+                <small> Seleccionar alguna para editar o registrar nueva IAP</small>
+            </h1>
+            <ol class="breadcrumb">
+                <li><a href="#"><i class="fa fa-dashboard"></i> Menú</a></li>
+                <li><a href="#">Instituciones de Asistencia Privada (IAPS) </a></li>
+                <li><a href="#">IAPS  </a></li>         
+            </ol>
+        </section>
+        <section class="content">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box">
+
+                        <div class="page-header" style="text-align:right;">
+                            Busqueda  
+                            {{ Form::open(['route' => 'buscarIap', 'method' => 'GET', 'class' => 'form-inline pull-right']) }}
+                                <div class="form-group">
+                                    {{ Form::text('name', null, ['class' => 'form-control', 'placeholder' => 'Nombre IAP']) }}
+                                </div>
+                                <div class="form-group">
+                                    {{ Form::text('email', null, ['class' => 'form-control', 'placeholder' => 'Email']) }}
+                                </div>
+                                <div class="form-group">
+                                    {{ Form::text('bio', null, ['class' => 'form-control', 'placeholder' => 'Objeto social']) }}
+                                </div>
+                                <div class="form-group">
+                                    <button type="submit" class="btn btn-default">
+                                    <span class="glyphicon glyphicon-search"></span>
+                                    </button>
+                                </div>
+                                <div class="form-group">
+                                <a href="{{route('downloadiap')}}" class="btn btn-success" title="Exportar catálogo de IAPS (formato Excel)"><i class="fa fa-file-excel-o"></i> Excel</a>                            
+
+                                <a href="{{route('nuevaIap')}}"   class="btn btn-primary btn_xs" title="Alta de nueva IAP"><i class="fa fa-file-new-o"></i><span class="glyphicon glyphicon-plus"></span>Nueva IAP</a>
+                                </div>                                
+                            {{ Form::close() }}
+
+                        </div>
+
+                        <div class="box-body">
+                            <table id="tabla1" class="table table-hover table-striped">
+                                <thead style="color: brown;" class="justify">
+                                    <tr>
+                                        <th style="text-align:left;   vertical-align: middle;">Id.              </th>
+                                        <th style="text-align:left;   vertical-align: middle;">Nombre de la IAP </th>
+                                        <th style="text-align:left;   vertical-align: middle;">Domicilio Legal  </th>     
+                                        <th style="text-align:left;   vertical-align: middle;">Colonia          </th>
+                                        <th style="text-align:left;   vertical-align: middle;">Foto1            </th>
+                                        <th style="text-align:left;   vertical-align: middle;">Foto2            </th>
+                                        <th style="text-align:center; vertical-align: middle;">Activa <br>Inact.</th>
+                                        
+                                        <th style="text-align:center; vertical-align: middle; width:100px;">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($regiap as $iap)
+                                    <tr>
+                                        <td style="text-align:left; vertical-align: middle;">{{$iap->iap_id}}        </td>
+                                        <td style="text-align:left; vertical-align: middle;">{{Trim($iap->iap_desc)}}</td>
+                                        <td style="text-align:left; vertical-align: middle;">{{$iap->iap_dom1}}     </td>
+                                        <td style="text-align:left; vertical-align: middle;">{{$iap->iap_colonia}}   </td>
+                                        
+                                        @if(isset($iap->iap_foto1))
+                                            <td style="color:darkgreen;text-align:center; vertical-align: middle;" title="Fotografía 1">
+                                                <a href="/images/{{$iap->iap_foto1}}" class="btn btn-success" title="Fotografía 1"><i class="fa-file-image-o"></i>gif, jpeg o png</a>
+                                                <a href="{{route('editarIap1',$iap->iap_id)}}" class="btn badge-warning" title="Editar Fotografía 1"><i class="fa fa-edit"></i></a>
+                                            </td>
+                                        @else
+                                            <td style="color:darkred; text-align:center; vertical-align: middle;" title="Sin Fotografía 1"><i class="fa fa-times">{{$iap->iap_foto1}} </i>
+                                        @endif   
+                                        @if(isset($iap->iap_foto2))
+                                            <td style="color:darkgreen;text-align:center; vertical-align: middle;" title="Fotografía 2">
+                                                <a href="/images/{{$iap->iap_foto2}}" class="btn btn-success" title="Fotografía 2"><i class="fa-file-image-o"></i>gif, jpeg o png</a>
+                                                <a href="{{route('editarIap2',$iap->iap_id)}}" class="btn badge-warning" title="Editar Fotografía 2"><i class="fa fa-edit"></i></a>
+                                            </td>
+                                        @else
+                                            <td style="color:darkred; text-align:center; vertical-align: middle;" title="Sin Fotografía 2"><i class="fa fa-times"> </i>
+                                            </td>   
+                                        @endif
+
+                                        @if($iap->iap_status == 'S')
+                                            <td style="color:darkgreen;text-align:center; vertical-align: middle;" title="Activo"><i class="fa fa-check"></i>
+                                            </td>                                            
+                                        @else
+                                            <td style="color:darkred; text-align:center; vertical-align: middle;" title="Inactivo"><i class="fa fa-times"></i>
+                                            </td>                                            
+                                        @endif
+                                        
+                                        <td style="text-align:center;">
+                                            <a href="{{route('editarIap',$iap->iap_id)}}" class="btn badge-warning" title="Editar IAP"><i class="fa fa-edit"></i></a>
+                                            <a href="{{route('borrarIap',$iap->iap_id)}}" class="btn badge-danger" title="Borrar IAP" onclick="return confirm('¿Seguro que desea borrar la IAP?')"><i class="fa fa-times"></i></a>
+                                        </td>                                                                                
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                            {!! $regiap->appends(request()->input())->links() !!}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+@endsection
+
+@section('request')
+@endsection
+
+@section('javascrpt')
+@endsection
